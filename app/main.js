@@ -2,7 +2,9 @@
 // define(['bower_components/componentName/file'])
 
 define(["jquery", "Funnel"], function($, Funnel) {
-  $('body').append('jQuery ' + $.fn.jquery + ' loaded!');
-  var funnel = new Funnel();
-  return funnel;
+    var data = {
+        name : 'signup flow',
+        data : [10000, 9000, 5000, 1000, 500]
+    };
+    var funnel = new Funnel(data);
 });
