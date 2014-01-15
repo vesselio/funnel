@@ -10,6 +10,7 @@ define([], function(){
         var _self = this;
         _self.canvas = null;
         _self.context = null;
+        _self.funnelData = data;
 
         // Canvs maintence
         var setupCanvas = function(options) {
@@ -92,12 +93,13 @@ define([], function(){
             return corners;
         };
         var makeFunnel = function(values){
-            var sortedData = values.data.sort( function( a,b ){ return b-a; } );
+            var sortedData = values.data.length ? values.data.sort( function( a,b ){ return b-a; } ) : [];
             var highest = getMax(sortedData);
             var valueCount = values.data.length;
             var previousValue = null;
 
-            sortedData.forEach(function(value, i){
+            for(var i = 0, l = sortedData.length; i < l; i++ ){
+                var value = sortedData[i];
                 if(i === 0){
                     previousValue = value;
                 }
@@ -106,13 +108,12 @@ define([], function(){
                     drawSection(corners);
                     previousValue = value;
                 }
-            });
+            }
         };
 
         var init = function( data, options ) {
             var data = arguments[0] ? arguments[0] : [];
             var options = arguments[1] ? arguments[1] : {};
-
             setupCanvas(options);
             makeFunnel(data);
             appendCanvas();
