@@ -28,11 +28,15 @@ define([], function(){
         // [0,0], [300,0], [250, 150], [50, 150]
         var drawSection = function( points ) {
             _self.context.beginPath();
-            _self.context.moveTo(0, 0);
-
             for(var i = 0, l = points.length; i < l; i++){
                 console.log(points[i]);
-                _self.context.lineTo(points[i][0],points[i][1]);
+                if(i===0){
+                    _self.context.moveTo(points[i][0],points[i][1]);
+                }
+                else{
+                    _self.context.lineTo(points[i][0],points[i][1]);
+                }
+                
             }
             _self.context.closePath();
             _self.context.fill();
@@ -60,7 +64,7 @@ define([], function(){
                 return temp;
             }
             else{
-                temp = getHorizontalLength(value) + getHorizontalOffset(canvasWidth, getHorizontalLength(value, highest));
+                temp = canvasWidth - getHorizontalOffset(canvasWidth, getHorizontalLength(value, highest));
                 return temp;
             }
         };
@@ -75,12 +79,12 @@ define([], function(){
                 return i * sectionHeight;
             }
         };
-        var getCorners = function(i, value, highest, valueCount){
+        var getCorners = function(i, value, highest, valueCount, previousValue){
             var corners = [];
-            corners.push([ calculateX(value, true, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
-            corners.push([ calculateX(value, false, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
-            corners.push([ calculateY(value, false, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
-            corners.push([ calculateY(value, true, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
+            corners.push([ calculateX(previousValue, true, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
+            corners.push([ calculateX(previousValue, false, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
+            corners.push([ calculateX(value, false, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
+            corners.push([ calculateX(value, true, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
 
             return corners;
         };
@@ -88,11 +92,16 @@ define([], function(){
             var sortedData = values.data.sort( function( a,b ){ return b-a; } );
             var highest = getMax(sortedData);
             var valueCount = values.data.length;
+            var previousValue = null;
 
             sortedData.forEach(function(value, i){
-                if(i !== 0){
-                    var corners = getCorners(i, value, highest, valueCount);
+                if(i === 0){
+                    previousValue = value;
+                }
+                else{
+                    var corners = getCorners(i, value, highest, valueCount, previousValue);
                     drawSection(corners);
+                    previousValue = value;
                 }
             });
         };
