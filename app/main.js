@@ -4,7 +4,8 @@
 define(["jquery", "Funnel"], function($, Funnel) {
     var data = {
         name : 'signup flow',
-        data : [10000, 9000, 5000, 800]
+        data : [100, 90, 70, 10]
     };
-    var funnel = new Funnel(data);
+    var options = { height : 400, width : 300 };
+    var funnel = new Funnel(data, options);
 });

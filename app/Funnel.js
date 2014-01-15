@@ -6,15 +6,21 @@
 // ]
 define([], function(){
     "use strict";
-    return function(data) {
+    return function(data, options) {
         var _self = this;
         _self.canvas = null;
         _self.context = null;
-        
 
         // Canvs maintence
-        var setupCanvas = function() {
+        var setupCanvas = function(options) {
             _self.canvas = document.createElement('canvas');
+
+            for (var prop in options) {
+                if(options.hasOwnProperty(prop)){
+                    console.log
+                    _self.canvas[prop] = options[prop];
+                }
+            }
             setupContext();
             return _self.canvas;
         };
@@ -24,12 +30,9 @@ define([], function(){
             _self.context.strokeStyle = "#000000";
             return _self.context;
         };
-        // ["Horizontal", "Vertical"]
-        // [0,0], [300,0], [250, 150], [50, 150]
         var drawSection = function( points ) {
             _self.context.beginPath();
             for(var i = 0, l = points.length; i < l; i++){
-                console.log(points[i]);
                 if(i===0){
                     _self.context.moveTo(points[i][0],points[i][1]);
                 }
@@ -106,11 +109,15 @@ define([], function(){
             });
         };
 
-        var init = function( data ) {
-            setupCanvas();
+        var init = function( data, options ) {
+            var data = arguments[0] ? arguments[0] : [];
+            var options = arguments[1] ? arguments[1] : {};
+
+            setupCanvas(options);
             makeFunnel(data);
             appendCanvas();
         };
-        init( data );
+
+        init( data, options);
     };
 });
