@@ -62,7 +62,6 @@ define([], function(){
             return sect;
         }
 
-        // Canvas maintence
         var getMax = function(array) {
             return Math.max.apply( Math, array );
         };
@@ -74,7 +73,6 @@ define([], function(){
                     _self.canvas[prop] = options[prop];
                 }
             }
-            setupContext();
             return _self.canvas;
         };
         var setupContext = function() {
@@ -127,11 +125,12 @@ define([], function(){
             var options = arguments[1] ? arguments[1] : {};
 
             setupCanvas(options);
+            setupContext();
             updateSections();
             drawSections();
             appendCanvas(target);
         };
-        
+
         init(data, options);
         return _self;
     };
