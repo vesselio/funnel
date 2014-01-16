@@ -121,8 +121,7 @@ define([], function(){
             }
         };
         var init = function() {
-            var data = arguments[0] ? arguments[0] : [];
-            var options = arguments[1] ? arguments[1] : {};
+            var options = arguments[0] ? arguments[0] : {};
 
             setupCanvas(options);
             setupContext();
@@ -131,7 +130,7 @@ define([], function(){
             appendCanvas(target);
         };
 
-        init(data, options);
+        init(options);
         return _self;
     };
 });
