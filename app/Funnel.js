@@ -15,10 +15,10 @@ define([], function(){
         _self.sections = [];
 
         function Section(i, value, topValue, maxValue) {
-            var sect = this;
-            sect.topvalue = topValue;
-            sect.bottomValue = this.value = value;
-            sect.corners = [];
+            var _sect = this;
+            _sect.topvalue = topValue;
+            _sect.bottomValue = this.value = value;
+            _sect.corners = [];
 
             var calculateX = function(value, isLeft, canvasWidth){
                 var temp = null;
@@ -51,15 +51,15 @@ define([], function(){
                 }
             };
             var getCorners = function(i, value, valueCount, topValue){
-                sect.corners.push([ calculateX(topValue, true, _self.canvas.width), calculateY(i, valueCount, true) ]);
-                sect.corners.push([ calculateX(topValue, false, _self.canvas.width), calculateY(i, valueCount, true) ]);
-                sect.corners.push([ calculateX(value, false, _self.canvas.width), calculateY(i, valueCount, false) ]);
-                sect.corners.push([ calculateX(value, true, _self.canvas.width), calculateY(i, valueCount, false) ]);
+                _sect.corners.push([ calculateX(topValue, true, _self.canvas.width), calculateY(i, valueCount, true) ]);
+                _sect.corners.push([ calculateX(topValue, false, _self.canvas.width), calculateY(i, valueCount, true) ]);
+                _sect.corners.push([ calculateX(value, false, _self.canvas.width), calculateY(i, valueCount, false) ]);
+                _sect.corners.push([ calculateX(value, true, _self.canvas.width), calculateY(i, valueCount, false) ]);
 
-                return sect.corners;
+                return _sect.corners;
             };
-            getCorners(i, value, _self.valueCount, sect.topvalue);
-            return sect;
+            getCorners(i, value, _self.valueCount, _sect.topvalue);
+            return _sect;
         }
 
         var getMax = function(array) {
