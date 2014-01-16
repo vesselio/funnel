@@ -6,26 +6,78 @@
 // ]
 define([], function(){
     "use strict";
-    return function(data, options) {
+    return function(target, data, options) {
         var _self = this;
         _self.canvas = null;
         _self.context = null;
-        _self.funnelData = data;
+        _self.sortedData = data.data.length ? data.data.sort( function( a,b ){ return b-a; } ) : [];
+        _self.valueCount = _self.sortedData.length;
+        _self.sections = [];
 
-        // Canvs maintence
+        function Section(i, value, topValue, maxValue) {
+            var sect = this;
+            sect.topvalue = topValue;
+            sect.bottomValue = this.value = value;
+            sect.corners = [];
+
+            var calculateX = function(value, isLeft, canvasWidth){
+                var temp = null;
+                var getHorizontalLength = function(value){
+                    var temp = value/maxValue * canvasWidth;
+                    return temp;
+                };
+                var getHorizontalOffset = function(canvasWidth, horizontalLength){
+                    return (canvasWidth - horizontalLength) / 2;
+                };
+
+                if(isLeft){
+                    temp = getHorizontalOffset(canvasWidth, getHorizontalLength(value, maxValue));
+                    return temp;
+                }
+                else{
+                    temp = canvasWidth - getHorizontalOffset(canvasWidth, getHorizontalLength(value, maxValue));
+                    return temp;
+                }
+            };
+            var calculateY = function(i, valueCount, isTop){
+                var trapazoidCount = valueCount-1;
+                var sectionHeight = _self.canvas.height / trapazoidCount;
+
+                if(isTop){
+                    return (i + (-1)) * sectionHeight;
+                }
+                else{
+                    return i * sectionHeight;
+                }
+            };
+            var getCorners = function(i, value, valueCount, topValue){
+                sect.corners.push([ calculateX(topValue, true, _self.canvas.width), calculateY(i, valueCount, true) ]);
+                sect.corners.push([ calculateX(topValue, false, _self.canvas.width), calculateY(i, valueCount, true) ]);
+                sect.corners.push([ calculateX(value, false, _self.canvas.width), calculateY(i, valueCount, false) ]);
+                sect.corners.push([ calculateX(value, true, _self.canvas.width), calculateY(i, valueCount, false) ]);
+
+                return sect.corners;
+            };
+            getCorners(i, value, _self.valueCount, sect.topvalue);
+            return sect;
+        }
+
+        // Canvas maintence
+        var getMax = function(array) {
+            return Math.max.apply( Math, array );
+        };
         var setupCanvas = function(options) {
             _self.canvas = document.createElement('canvas');
 
             for (var prop in options) {
                 if(options.hasOwnProperty(prop)){
-                    console.log
                     _self.canvas[prop] = options[prop];
                 }
             }
             setupContext();
             return _self.canvas;
         };
-        var setupContext = function(){
+        var setupContext = function() {
             _self.context = _self.canvas.getContext('2d');
             _self.context.fillStyle = "#000000";
             _self.context.strokeStyle = "#000000";
@@ -45,80 +97,42 @@ define([], function(){
             _self.context.closePath();
             _self.context.fill();
         };
-        var appendCanvas = function() {
-            return document.getElementsByTagName('body')[0].appendChild(_self.canvas);
-        };
-
-        // Data maintence
-        var getMax = function( array ) {
-            return Math.max.apply( Math, array );
-        };
-        var calculateX = function(value, isLeft, canvasWidth, highest){
-            var temp = null;
-            var getHorizontalLength = function(value, highest){
-                var temp = value/highest * canvasWidth;
-                return temp;
-            };
-            var getHorizontalOffset = function(canvasWidth, horizontalLength){
-                return (canvasWidth - horizontalLength) / 2;
-            };
-
-            if(isLeft){
-                temp = getHorizontalOffset(canvasWidth, getHorizontalLength(value, highest));
-                return temp;
-            }
-            else{
-                temp = canvasWidth - getHorizontalOffset(canvasWidth, getHorizontalLength(value, highest));
-                return temp;
+        var drawSections = function() {
+            for(var i = 0, l = _self.sections.length; i < l; i++){
+                drawSection(_self.sections[i]['corners']);
             }
         };
-        var calculateY = function(i, valueCount, isTop){
-            var trapazoidCount = valueCount-1;
-            var sectionHeight = _self.canvas.height / trapazoidCount;
-
-            if(isTop){
-                return (i + (-1)) * sectionHeight;
-            }
-            else{
-                return i * sectionHeight;
-            }
+        var appendCanvas = function(target) {
+            return target.appendChild(_self.canvas);
         };
-        var getCorners = function(i, value, highest, valueCount, previousValue){
-            var corners = [];
-            corners.push([ calculateX(previousValue, true, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
-            corners.push([ calculateX(previousValue, false, _self.canvas.width, highest), calculateY(i, valueCount, true) ]);
-            corners.push([ calculateX(value, false, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
-            corners.push([ calculateX(value, true, _self.canvas.width, highest), calculateY(i, valueCount, false) ]);
-
-            return corners;
-        };
-        var makeFunnel = function(values){
-            var sortedData = values.data.length ? values.data.sort( function( a,b ){ return b-a; } ) : [];
-            var highest = getMax(sortedData);
-            var valueCount = values.data.length;
+        var updateSections = function() {
             var previousValue = null;
+            var maxValue = getMax(_self.sortedData);
 
-            for(var i = 0, l = sortedData.length; i < l; i++ ){
-                var value = sortedData[i];
+            for(var i = 0, l = _self.valueCount; i < l; i++ ){
+                var value = _self.sortedData[i];
                 if(i === 0){
                     previousValue = value;
                 }
                 else{
-                    var corners = getCorners(i, value, highest, valueCount, previousValue);
-                    drawSection(corners);
+                    var section = new Section(i, value, previousValue, maxValue);
+
+                    _self.sections.push(section);
                     previousValue = value;
                 }
             }
         };
-
-        var init = function( data, options ) {
+        var init = function() {
             var data = arguments[0] ? arguments[0] : [];
             var options = arguments[1] ? arguments[1] : {};
-            setupCanvas(options);
-            makeFunnel(data);
-            appendCanvas();
-        };
 
-        init( data, options);
+            setupCanvas(options);
+            updateSections();
+            drawSections();
+            appendCanvas(target);
+        };
+        
+        init(data, options);
+        return _self;
     };
 });
